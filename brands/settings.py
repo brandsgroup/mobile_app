@@ -1,4 +1,5 @@
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,13 +52,21 @@ WSGI_APPLICATION = 'brands.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'verceldb',  # Replace with the database name
+        'USER': 'default',  # Replace with the username
+        'PASSWORD': 'Bk3PpgHtv9Gf',  # Replace with the password
+        'HOST': 'ep-dry-hill-a4w3bqxm-pooler.us-east-1.aws.neon.tech',  # Replace with the hostname
+        'PORT': '5432',  # Default PostgreSQL port
+        'OPTIONS': {
+            'sslmode': 'require',  # Ensure SSL mode is set if required
+        }
     }
 }
+
+# DATABASES['default'] = dj_database_url.config()
 
 
 # Password validation
@@ -98,7 +107,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Static files settings
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]  # Where you store static files like CSS, JS, etc.
+STATICFILES_DIRS = os.path.join(BASE_DIR,'static'),  # Where you store static files like CSS, JS, etc.
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles_build', 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
