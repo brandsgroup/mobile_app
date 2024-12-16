@@ -1,0 +1,28 @@
+<!-- post_employee.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create or Update Post</title>
+    <style>
+        /* Add styling similar to previous templates */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create or Update Post</h1>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="readonly-field">Employee ID: {{ employee_id }}</div>
+            <div class="readonly-field">Username: {{ username }}</div>
+            <div class="readonly-field">Date & Time: {{ current_datetime }}</div>
+
+            {{ form.as_p }}
+            <button type="submit">Submit Post</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .info-item {
+        display: flex;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    .info-label {
+        font-weight: bold;
+        width: 150px;
+        color: #555;
+    }
+    .info-value {
+        flex: 1;
+    }
+    /* Debug styles */
+    .debug-info {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 20px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Debug information -->
+<div class="debug-info">
+    <p>Session ID: {{ request.session.session_key }}</p>
+    <p>Employee ID in session: {{ request.session.employee_id }}</p>
+</div>
+
+<div class="profile-container">
+    {% if employee %}
+        <div class="profile-info">
+            <div class="info-item">
+                <div class="info-label">Name:</div>
+                <div class="info-value">{{ employee.name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Employee ID:</div>
+                <div class="info-value">{{ employee.employee_id }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email:</div>
+                <div class="info-value">{{ employee.email }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Designation:</div>
+                <div class="info-value">{{ employee.designation }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Phone Number:</div>
+                <div class="info-value">{{ employee.phone_number }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Date of Birth:</div>
+                <div class="info-value">{{ employee.dob }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Date Joined:</div>
+                <div class="info-value">{{ employee.date_joined }}</div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            No employee data available. Employee object is None.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Debug output -->
+<div class="debug-info">
+    <h3>Debug Information:</h3>
+    <pre>{{ employee|pprint }}</pre>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    console.log("Page loaded");
+    console.log("Employee data:", {{ employee|json_script:"employee-data" }});
+    
+    // Print all session data
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Session data available:", {{ request.session.items|json_script:"session-data" }});
+    });
+</script>
+{% endblock %}

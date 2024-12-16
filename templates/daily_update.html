@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Update</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        h2, h3 {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #333;
+            margin-bottom: 1.5rem;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        /* Form Styling */
+        form {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .form-control {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Post Card Styling */
+        .post-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ff5722;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .post-subject {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-right: 1rem;
+        }
+
+        .post-time {
+            font-size: 0.85rem;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .post-description {
+            color: #555;
+            margin: 0.5rem 0;
+            word-wrap: break-word;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .post-date {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            background: #ff5722;
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+            padding: 0.75rem;
+        }
+
+        .btn-primary:hover {
+            background: #ff7849;
+        }
+
+        .btn-warning {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        /* Mobile Specific Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .card {
+                padding: 0.75rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            .form-control {
+                font-size: 16px;
+            }
+
+            .btn-primary {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .post-header {
+                flex-direction: column;
+            }
+
+            .post-time {
+                margin-top: 0.25rem;
+            }
+
+            form label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            form p {
+                margin-bottom: 1rem;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-3">
+    <!-- Header -->
+    <div class="text-center mb-3">
+        <h2>Daily Updates</h2>
+        <p>Submit updates quickly and view past records.</p>
+    </div>
+
+    <!-- Form Section -->
+    <div class="card">
+        <h3>{% if post %} Edit Update {% else %} Create Update {% endif %}</h3>
+        <form method="POST" class="mt-3">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">
+                {% if post %} Update {% else %} Submit {% endif %}
+            </button>
+        </form>
+    </div>
+
+    <!-- Posts Section -->
+    <div class="card">
+        <h3>Your Posts</h3>
+        <div class="posts-container">
+            {% for post in employee_posts %}
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-subject">{{ post.subject }}</div>
+                    <div class="post-time">{{ post.time }}</div>
+                </div>
+                <div class="post-description">
+                    {{ post.description }}
+                </div>
+                <div class="post-footer">
+                    <div class="post-date">{{ post.date }}</div>
+                    <a href="{% url 'daily_update' post.id %}" class="btn btn-warning btn-sm">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted">
+                <p>No updates yet!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

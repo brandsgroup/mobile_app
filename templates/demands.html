@@ -1,0 +1,228 @@
+<!-- demands.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage Demands</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .card-container {
+            margin: 20px auto;
+            max-width: 100%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .card {
+            border: none;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: #6c63ff;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .card-body {
+            font-size: 14px;
+            padding: 20px;
+        }
+
+        .btn-action {
+            transition: transform 0.3s, background-color 0.3s;
+            border-radius: 30px;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+            background-color: #6c63ff !important;
+            color: white;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .proof-section, .bill-section {
+            margin-top: 10px;
+        }
+
+        .proof-section a, .bill-section a {
+            text-decoration: none;
+            color: #6c63ff;
+        }
+
+        .proof-section a:hover, .bill-section a:hover {
+            text-decoration: underline;
+        }
+
+        @media screen and (max-width: 768px) {
+            .card-container {
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            .btn-action {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container card-container">
+        <h2 class="mb-4">Admin - Manage Demands</h2>
+        <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+        
+        <div class="row">
+            {% for demand in demands %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        Demand #{{ demand.id }}
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Employee:</strong> {{ demand.employee.username }}</p>
+                        <p><strong>Site Name:</strong> {{ demand.site_name }}</p>
+                        <p><strong>Company:</strong> {{ demand.company_name }}</p>
+                        <p><strong>Amount:</strong> {{ demand.amount }}</p>
+
+                        <p><strong>Status:</strong> <span id="status-{{ demand.id }}" class="status">{{ demand.status }}</span></p>
+
+                        {% if demand.status != "approved" and demand.status != "declined" %}
+                            <button class="btn btn-success btn-action" onclick="updateStatus({{ demand.id }}, 'approved')">Approve</button>
+                            <button class="btn btn-danger btn-action" onclick="updateStatus({{ demand.id }}, 'declined')">Decline</button>
+                        {% endif %}
+
+                        <button class="btn btn-info btn-action mt-2" onclick="showUploadModal({{ demand.id }})">Upload Proof</button>
+
+                        <!-- Display proofs and bills if they exist -->
+                        {% if demand.proofs.all %}
+                            <div class="proof-section">
+                                <strong>Proof(s):</strong>
+                                {% for proof in demand.proofs.all %}
+                                    <p>Proof: <a href="{{ proof.file_path.url }}" target="_blank">{{ proof.file_name }}</a></p>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>No proofs uploaded.</p>
+                        {% endif %}
+
+                        {% if demand.bills.all %}
+                            <div class="bill-section">
+                                <strong>Bill(s):</strong>
+                                {% for bill in demand.bills.all %}
+                                    <p>Bill: <a href="{{ bill.file_path.url }}" target="_blank">{{ bill.file_name }}</a></p>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>No bills uploaded.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal for Uploading Proof -->
+    <div class="modal fade" id="uploadProofModal" tabindex="-1" aria-labelledby="uploadProofModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadProofModalLabel">Upload Proof</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="uploadProofForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" id="demandIdInput" name="demand_id">
+                        <div class="mb-3">
+                            <label for="proofFile" class="form-label">Choose File</label>
+                            <input type="file" class="form-control" id="proofFile" name="proof_file" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showUploadModal(demandId) {
+            $('#demandIdInput').val(demandId);
+            $('#uploadProofModal').modal('show');
+        }
+
+        $('#uploadProofForm').on('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const demandId = $('#demandIdInput').val();
+
+            $.ajax({
+                url: '/upload-proof/' + demandId + '/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': $('#csrf_token').val()
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert('Proof uploaded successfully!');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert('Error uploading proof: ' + xhr.responseText);
+                }
+            });
+        });
+
+        function updateStatus(demandId, status) {
+            $.ajax({
+                url: '/update-demand-status/' + demandId + '/',
+                method: 'POST',
+                data: {
+                    status: status,
+                    csrfmiddlewaretoken: $('#csrf_token').val()
+                },
+                success: function(response) {
+                    alert('Status updated successfully!');
+                    $('#status-' + demandId).text(response.demand_status);  // Update status in the DOM
+                    // Hide the buttons after status update
+                    $('button[onclick="updateStatus(' + demandId + ', \'approved\')"]').hide();
+                    $('button[onclick="updateStatus(' + demandId + ', \'declined\')"]').hide();
+                },
+                error: function(xhr) {
+                    alert('Error updating status: ' + xhr.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

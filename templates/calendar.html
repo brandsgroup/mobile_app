@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Calendar with Indian Holidays</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin: 20px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Container for content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 15px;
+        }
+
+        /* Calendar Container */
+        .calendar-container {
+            position: relative;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            background-color: #fff;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    color: #4e54c8;
+    margin-bottom: 15px;
+    position: relative;
+}
+.slider-button, .right-arrow-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #4e54c8;
+    color: #fff;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .calendar-table th, .calendar-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .calendar-table th {
+            background-color: #4e54c8;
+            color: white;
+        }
+
+        .calendar-table td {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .calendar-table td:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        /* Highlight current date */
+        .calendar-table td.current-date {
+            background-color: #ff6b6b;
+            color: #fff;
+            font-weight: bold;
+        }
+
+     
+
+
+        .slider-button {
+            left: 10px;
+        }
+
+        .right-arrow-button {
+            right: 10px;
+        }
+
+        .slider-button:hover, .right-arrow-button:hover {
+            background-color: #8f94fb;
+        }
+
+        /* Leave Section */
+        .leave-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .leave-card {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            flex: 1 1 calc(45% - 20px);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .leave-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .leave-card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #4e54c8;
+        }
+
+        .leave-card p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #576574;
+        }
+
+        /* Holiday List */
+        #holiday-list {
+            margin-top: 30px;
+            list-style: none;
+            padding: 0;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        #holiday-list li {
+            background: #ff6b6b;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .calendar-header {
+                font-size: 18px;
+            }
+
+            .calendar-table th, .calendar-table td {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .leave-card {
+                flex: 1 1 100%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>2025 Calendar with Indian Holidays</h1>
+
+        <!-- Calendar Section -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="slider-button" onclick="moveMonth(-1)">&#8592;</div>
+                <div id="month-header">January 2025</div>
+                <div class="right-arrow-button" onclick="moveMonth(1)">&#8594;</div>
+            </div>
+            <table class="calendar-table" id="calendar-table">
+                <!-- Calendar will be dynamically generated here -->
+            </table>
+        </div>
+
+        <!-- Indian Holidays for 2025 -->
+        <h2>Indian Holidays in 2025</h2>
+        <ul id="holiday-list">
+            <!-- List of holidays will be dynamically added here -->
+        </ul>
+
+        <!-- Leave Section -->
+        <div class="leave-section">
+            <div class="leave-card">
+                <h3>Privilege Leaves (PL)</h3>
+                <p>13 per year</p>
+            </div>
+            <div class="leave-card">
+                <h3>Sick Leaves (SL)</h3>
+                <p>12 per year</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const holidays = [
+            { date: '2025-01-26', name: 'Republic Day' },
+            { date: '2025-08-15', name: 'Independence Day' },
+            { date: '2025-10-02', name: 'Gandhi Jayanti' },
+            { date: '2025-11-14', name: 'Diwali' },
+            { date: '2025-12-25', name: 'Christmas' },
+            // Add more holidays for 2025
+        ];
+
+        const leaveDays = { pl: 13, sl: 12 };
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth(); // 0 = January, 11 = December
+        let currentYear = currentDate.getFullYear();
+
+        // Function to generate the calendar for a specific month
+        function generateCalendar(month, year) {
+            const monthHeader = document.getElementById('month-header');
+            const calendarTable = document.getElementById('calendar-table');
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+
+            // Set the month name
+            monthHeader.textContent = `${firstDayOfMonth.toLocaleString('default', { month: 'long' })} ${year}`;
+
+            // Generate the calendar table
+            let daysInMonth = lastDayOfMonth.getDate();
+            let firstDay = firstDayOfMonth.getDay();
+            let tableHTML = `<tr>`;
+
+            // Empty spaces for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                tableHTML += `<td></td>`;
+            }
+
+            // Generate each day cell
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${month + 1 < 10 ? '0' : ''}${month + 1}-${day < 10 ? '0' : ''}${day}`;
+                const isToday = (new Date()).toISOString().split('T')[0] === dateStr;
+                const isHoliday = holidays.some(holiday => holiday.date === dateStr);
+                
+                tableHTML += `<td class="${isToday ? 'current-date' : ''} ${isHoliday ? 'holiday' : ''}">
+                                ${day}
+                              </td>`;
+
+                // Move to the next row after 7 days (one week)
+                if ((firstDay + day) % 7 === 0) {
+                    tableHTML += `</tr><tr>`;
+                }
+            }
+
+            tableHTML += `</tr>`;
+            calendarTable.innerHTML = tableHTML;
+        }
+
+        // Function to display holidays
+        function displayHolidays() {
+            const holidayList = document.getElementById('holiday-list');
+            holidays.forEach(holiday => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${holiday.date}: ${holiday.name}`;
+                holidayList.appendChild(listItem);
+            });
+        }
+
+        // Function to move to previous or next month
+        function moveMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar(currentMonth, currentYear);
+        }
+
+        // Initial setup
+        generateCalendar(currentMonth, currentYear);
+        displayHolidays();
+    </script>
+
+</body>
+</html>

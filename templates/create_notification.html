@@ -1,0 +1,17 @@
+<!-- templates/create_notification.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Notification</title>
+</head>
+<body>
+    <h1>Create Notification</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{% url 'notifications_view' %}">Back to Notifications</a>
+</body>
+</html>

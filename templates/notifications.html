@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Basic Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background-size: cover;
+            overflow: hidden;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Animation for fade-in effect */
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            padding: 15px;
+        }
+
+        /* Form Container */
+        .form-container, .notifications-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-container:hover, .notifications-list:hover {
+            transform: scale(1.05);
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #1dd1a1;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box; /* Ensures padding is included in the width */
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #10ac84;
+            outline: none;
+        }
+
+        .form-container button {
+            padding: 12px 25px;
+            background: #ff6f61;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .form-container button:hover {
+            background: #ff3d36;
+            transform: scale(1.1);
+        }
+
+        /* Notification Cards */
+        .notification-card {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateY(-100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .notification-card h3 {
+            margin-bottom: 10px;
+            color: #1dd1a1;
+        }
+
+        .notification-card p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .notification-card small {
+            display: block;
+            font-size: 0.8rem;
+            color: #fbc531;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            background: #ff9f43;
+        }
+
+        .delete-btn {
+            background: #ff4c4c;
+        }
+
+        .edit-btn:hover {
+            background: #ff7847;
+        }
+
+        .delete-btn:hover {
+            background: #ff1a1a;
+        }
+
+        .toggle-btn {
+            font-size: 1.5rem;
+            background: #4e54c8;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            background: #6a11cb;
+            transform: scale(1.1);
+        }
+
+        .form-container img {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Mobile-Friendly Adjustments */
+        @media (max-width: 600px) {
+            body {
+                padding: 20px;
+            }
+
+            h1, h2 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .form-container, .notifications-list {
+                padding: 15px;
+            }
+
+            .form-group input, .form-group textarea, .form-group select {
+                font-size: 0.9rem;
+            }
+
+            .form-container button {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+
+            .notification-card {
+                padding: 12px;
+            }
+
+            .action-btns a {
+                font-size: 0.9rem;
+                padding: 6px 15px;
+            }
+
+            .toggle-btn {
+                font-size: 1.3rem;
+                padding: 8px 18px;
+            }
+        }
+
+        /* For Larger Screens like Tablets */
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .container {
+                max-width: 90%;
+            }
+
+            .form-container, .notifications-list {
+                padding: 20px;
+            }
+
+            h1, h2 {
+                font-size: 1.7rem;
+            }
+
+            .toggle-btn {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Button to Show Create Notification Form -->
+        <button class="toggle-btn" onclick="toggleCreateForm()">Create Notification</button>
+
+        <!-- Form Container for Creating Notification (Initially Hidden) -->
+        <div id="createForm" class="form-container" style="display: none;">
+            <h2>{{ title }} <i class="fas fa-bell"></i></h2>
+            <form method="post" action="{% if notification %}{% url 'update_notification' notification.pk %}{% else %}{% url 'create_notification' %}{% endif %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" value="{% if notification %}{{ notification.title }}{% endif %}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="4" required>{% if notification %}{{ notification.message }}{% endif %}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="employee">For Employee (Optional)</label>
+                    <select id="employee" name="employee">
+                        <option value="">All Employees</option>
+                        {% for user in employees %}
+                            <option value="{{ user.id }}" {% if notification and notification.employee == user %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit">{% if notification %}Update{% else %}Create{% endif %} Notification</button>
+            </form>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="notifications-list">
+            <h2>All Notifications <i class="fas fa-bell"></i></h2>
+            {% for notification in notifications %}
+                <div class="notification-card">
+                    <h3>{{ notification.title }}</h3>
+                    <p>{{ notification.message }}</p>
+                    <small>Created: {{ notification.created_at }}</small>
+
+                    <div class="action-btns">
+                        <!-- Edit Button that triggers form toggle with pre-filled data -->
+                        <button class="edit-btn" onclick="editNotification({{ notification.pk }}, '{{ notification.title }}', '{{ notification.message }}', '{{ notification.employee.username|default:'' }}')">Edit</button>
+                        <a href="{% url 'delete_notification' notification.pk %}" class="delete-btn">Delete</a>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No notifications available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Function to toggle visibility of the Create Notification form
+        function toggleCreateForm() {
+            var form = document.getElementById("createForm");
+            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+        }
+
+        // Function to Show Edit Notification Form with Prefilled Data
+        function editNotification(id, title, message, employee) {
+            var form = document.getElementById("createForm");
+            document.getElementById("title").value = title;
+            document.getElementById("message").value = message;
+            var employeeSelect = document.getElementById("employee");
+            employeeSelect.value = employee ? employee : "";
+            form.style.display = "block";
+        }
+    </script>
+
+</body>
+</html>

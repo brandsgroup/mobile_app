@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Proof</title>
+</head>
+<body>
+    <h1>Upload Money Transfer Proof</h1>
+    <h2>Demand: {{ demand.id }} - {{ demand.site_name }}</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="proof">Upload Proof (Image/Document):</label>
+        <input type="file" name="proof" id="proof" required>
+        <button type="submit">Upload Proof</button>
+    </form>
+
+    <br>
+    <a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+</body>
+</html>

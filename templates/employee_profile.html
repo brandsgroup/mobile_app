@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>{{ employee_profile.user.username }}'s Profile</h1>
+    <div>
+        <p><strong>Employee ID:</strong> {{ employee_profile.employee_id }}</p>
+        <p><strong>Name:</strong> {{ employee_profile.user.first_name }} {{ employee_profile.user.last_name }}</p>
+        <p><strong>Email:</strong> {{ employee_profile.user.email }}</p>
+        <p><strong>Phone Number:</strong> {{ employee_profile.user.employee.phone_number }}</p>
+        <p><strong>Designation:</strong> {{ employee_profile.user.employee.designation }}</p>
+        <p><strong>Office In Time:</strong> {{ employee_profile.office_in_time }}</p>
+        <p><strong>Location:</strong> Latitude: {{ employee_profile.latitude }}, Longitude: {{ employee_profile.longitude }}</p>
+        <p><strong>Last Logout:</strong> {{ employee_profile.logout_time }}</p>
+    </div>
+    <a href="{% url 'employee_dashboard' %}">Back to Dashboard</a>
+</body>
+</html>

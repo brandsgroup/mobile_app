@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .dashboard-header {
+            background-color: #4e73df;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+        }
+
+        .profile-section button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .dashboard-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(1.05);
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #4e73df;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: #e74a3b;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+
+        .notifications-section {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .notifications-title {
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .notification {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .notification.success {
+            border-left: 5px solid #28a745;
+        }
+
+        .notification.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .notification.info {
+            border-left: 5px solid #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Header Section -->
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <a href="{% url 'employee' %}" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-users"></i></div>
+                <div class="card-title">Manage Employees</div>
+            </a>
+
+            <a href="{% url 'handle_demand_admin' %}" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="card-title">Approve Demands</div>
+            </a>
+
+            <a href="{% url 'admin_daily_update' %}" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="card-title">View Reports</div>
+            </a>
+
+            <a href="{% url 'notifications' %}" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-bell"></i></div>
+                <div class="card-title">Notifications</div>
+            </a>
+            <a href="{% url 'calendar' %}" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="card-title">Calendar
+                </div>
+            </a>
+
+
+            <a href="{% url 'logout' %}" class="dashboard-card logout-btn">
+                <div class="card-icon"><i class="fas fa-sign-out-alt"></i></div>
+                <div class="card-title">Logout</div>
+            </a>
+        </div>
+
+</body>
+</html>

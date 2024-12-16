@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            background: #6c63ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .animated-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            background: linear-gradient(45deg, #8983ff, #6c63ff);
+            transform-origin: 50% 48%;
+            animation: wave 8s infinite linear;
+        }
+
+        .wave:nth-child(2) {
+            animation-delay: -2s;
+            opacity: 0.2;
+        }
+
+        .wave:nth-child(3) {
+            animation-delay: -4s;
+            opacity: 0.1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+            animation: 
+                containerAppear 1s ease-out,
+                floatingContainer 6s ease-in-out infinite;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            color: #6c63ff;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+            animation: titleAppear 0.8s ease-out;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+            animation: inputAppear 0.5s ease-out forwards;
+        }
+
+        .input-group:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #6c63ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #6c63ff;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: #5b52ff;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff3e3e;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(255, 62, 62, 0.1);
+            display: none;
+        }
+
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            display: none;
+        }
+
+        /* Updated Popup Styles */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin: 1rem;
+        }
+
+        .popup-content h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .popup-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        #allowLocation, #cancelLocation {
+            margin: 0.5rem 0;
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        #allowLocation {
+            background: #6c63ff;
+            color: white;
+        }
+
+        #cancelLocation {
+            background: #ff3e3e;
+            color: white;
+        }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            h2 {
+                font-size: 1.75rem;
+            }
+
+            .popup-content {
+                padding: 1.5rem;
+                position: absolute;
+                top: 10%;
+                z-index: 2000; /* Ensure it appears above the login form */
+            }
+
+            .popup-content h3 {
+                font-size: 1.25rem;
+            }
+
+            .popup-content p {
+                font-size: 0.95rem;
+            }
+
+            #allowLocation, #cancelLocation {
+                padding: 0.75rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-background">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <div class="container">
+        <h2>Employee Login</h2>
+        <div id="errorMessage" class="error-message"></div>
+        <form id="loginForm">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit">
+                <span>Login</span>
+                <div id="loader" class="loader"></div>
+            </button>
+        </form>
+    </div>
+
+    <div id="locationPopup" class="popup">
+        <div class="popup-content">
+            <h3>Location Access Required</h3>
+            <p>Please allow location access to continue logging in.</p>
+            <button id="allowLocation">Allow Location</button>
+            <button id="cancelLocation">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Keeping the existing JavaScript functionality
+        const loginForm = document.getElementById('loginForm');
+        const locationPopup = document.getElementById('locationPopup');
+        const allowLocationBtn = document.getElementById('allowLocation');
+        const cancelLocationBtn = document.getElementById('cancelLocation');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let credentials = null;
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            loader.style.display = 'none';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        async function performLogin(formData) {
+            try {
+                const response = await fetch('/employee_login/', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    credentials = {
+                        username: formData.get('username'),
+                        password: formData.get('password')
+                    };
+                    locationPopup.style.display = 'flex';
+                } else {
+                    showError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                showError('An error occurred during login');
+                console.error('Login error:', error);
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function handleLocation(position) {
+            if (!credentials) return;
+            
+            const formData = new FormData();
+            formData.append('username', credentials.username);
+            formData.append('password', credentials.password);
+            formData.append('latitude', position.coords.latitude);
+            formData.append('longitude', position.coords.longitude);
+            
+            try {
+                const response = await fetch('/save_location/', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = data.redirect_url || '/employee_dashboard/';
+                } else {
+                    showError(data.error || 'Failed to save location');
+                    locationPopup.style.display = 'none';
+                }
+            } catch (error) {
+                showError('An error occurred while saving location');
+                console.error('Location save error:', error);
+                locationPopup.style.display = 'none';
+            }
+        }
+
+        function handleLocationError(error) {
+            let errorMsg = 'Unable to get location. ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg += 'Please enable location services.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg += 'Location information unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg += 'Location request timed out.';
+                    break;
+                default:
+                    errorMsg += 'An unknown error occurred.';
+            }
+            showError(errorMsg);
+            locationPopup.style.display = 'none';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+            loader.style.display = 'block';
+            const formData = new FormData(e.target);
+            await performLogin(formData);
+        });
+
+        allowLocationBtn.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(handleLocation, handleLocationError);
+            } else {
+                showError('Geolocation is not supported by this browser');
+                locationPopup.style.display = 'none';
+            }
+        });
+
+        cancelLocationBtn.addEventListener('click', () => {
+            locationPopup.style.display = 'none';
+            credentials = null;
+        });
+    </script>
+</body>
+</html>

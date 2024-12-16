@@ -1,0 +1,162 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            min-height: 100vh;
+            color: #333;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container Styling */
+        .container {
+            max-width: 1000px;
+            width: 90%;
+            background: #8f94fb;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        /* Header Styling */
+        h1 {
+            color: #4e54c8;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* Create Employee Button */
+        .create-employee-btn {
+            display: inline-block;
+            background-color: #4e54c8;
+            color: #ffffff;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .create-employee-btn:hover {
+            background-color: #3c42b3;
+            transform: scale(1.05);
+        }
+
+        /* Employee Cards */
+        .employee-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .employee-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .employee-card h3 {
+            font-size: 1.5rem;
+            color: #4e54c8;
+            margin-bottom: 10px;
+        }
+
+        .employee-card p {
+            font-size: 0.95rem;
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .designation {
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .actions a {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+        }
+
+        .edit-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Management</h1>
+
+        <!-- Create Employee Button -->
+        <a href="{% url 'create_employee' %}" class="create-employee-btn">+ Add Employee</a>
+
+        <!-- Employee List -->
+        <div class="employee-list">
+            {% for employee in employees %}
+                <div class="employee-card">
+                    <h3>{{ employee.name }}</h3>
+                    <p><strong>Username:</strong> {{ employee.username }}</p>
+                    <p class="designation">{{ employee.designation }}</p>
+                    <p><strong>Email:</strong> {{ employee.email }}</p>
+                    <p><strong>Phone:</strong> {{ employee.phone_number }}</p>
+                    <div class="actions">
+                        <a href="{% url 'edit_employee' employee.employee_id %}" class="edit-btn">Edit</a>
+                        <a href="{% url 'delete_employee' employee.employee_id %}" class="delete-btn">Delete</a>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No employees available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,460 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+            --secondary-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF2D2D 100%);
+            --success-gradient: linear-gradient(135deg, #28C76F 0%, #18A852 100%);
+            --warning-gradient: linear-gradient(135deg, #FFB86C 0%, #FF922B 100%);
+            --info-gradient: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+        }
+
+        body {
+            min-height: 100vh;
+            background: #6c63ff;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .dashboard-wrapper {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .dashboard-header {
+            background: #fff;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-gradient);
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(0, 13, 255, 0.2);
+        }
+
+        .profile-btn:hover {
+            transform: scale(1.1) rotate(360deg);
+        }
+
+        /* Notification Button */
+        .notifications-toggle {
+            background: var(--secondary-gradient);
+            color: rgb(238, 13, 13);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 45, 45, 0.2);
+        }
+
+        .notifications-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 45, 45, 0.3);
+        }
+
+        .notifications-toggle i {
+            animation: bell 2s infinite;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .dashboard-card {
+            background: rgb(233, 233, 233);
+            border-radius: 20px;
+            padding: 25px;
+            text-decoration: none;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 45px rgba(31, 38, 135, 0.1);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .demand-btn::before { background: var(--warning-gradient); }
+        .calendar-btn::before { background: var(--info-gradient); }
+        .daily-update-btn::before { background: var(--success-gradient); }
+        .logout-btn::before { background: var(--secondary-gradient); }
+        .notification-btn::before { background: red; }
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: rgb(0, 0, 0);
+            margin-bottom: 10px;
+        }
+
+        .demand-btn .card-icon { background: var(--warning-gradient); }
+        .calendar-btn .card-icon { background: var(--info-gradient); }
+        .daily-update-btn .card-icon { background: var(--success-gradient); }
+        .logout-btn .card-icon { background: var(--secondary-gradient); }
+        .card-icon { background: red; }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* Notifications Modal */
+        .notifications-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notifications-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .notifications-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: rgb(197, 53, 53);
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 1000;
+            overflow-y: auto;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .notifications-container.show {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .notification-card {
+            background: #ebebeb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification-card.success { border-left: 4px solid #28C76F; }
+        .notification-card.error { border-left: 4px solid #FF4D4D; }
+        .notification-card.info { border-left: 4px solid #2196F3; }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #ff4d4d;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bell {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            20%, 60% {
+                transform: rotate(15deg);
+            }
+            40%, 80% {
+                transform: rotate(-15deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .profile-section {
+                flex-direction: column;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .notifications-container {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .card-content {
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-wrapper {
+                padding: 10px;
+            }
+
+            .dashboard-header {
+                padding: 15px;
+            }
+
+            .notifications-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Header Section -->
+        <div class="dashboard-header">
+            <h1>Employee Dashboard</h1>
+            <div class="profile-section">
+                
+                <!-- <button class="profile-btn" onclick="window.location.href='{% url 'employee_profile' %}'">
+                    <i class="fas fa-user"></i>
+                </button> -->
+            </div>
+        </div>
+   
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <a href="{% url 'notifications_view' %}" class="dashboard-card notification-btn">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="card-title">Notification</h3>
+                </div>
+            </a>
+            
+            <a href="{% url 'handle_demand_employee' %}" class="dashboard-card demand-btn">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h3 class="card-title">Demand</h3>
+                </div>
+            </a>
+            
+
+            <a href="{% url 'calendar' %}" class="dashboard-card calendar-btn">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="card-title">Calendar</h3>
+                </div>
+            </a>
+
+            <a href="{% url 'daily_update' %}" class="dashboard-card daily-update-btn">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <h3 class="card-title">Daily Update</h3>
+                </div>
+            </a>
+
+            <a href="{% url 'logout' %}" class="dashboard-card logout-btn">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <h3 class="card-title">Logout</h3>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Notifications Overlay -->
+    <div class="notifications-overlay" onclick="toggleNotifications()"></div>
+
+    <!-- Notifications Container -->
+    <div class="notifications-container">
+        <h2>Notifications</h2>
+        <ul>
+            {% for notification in notifications %}
+                <li class="notification-card {{ notification.type }}">
+                    <div>
+                        <h3>{{ notification.title }}</h3>
+                        <p>{{ notification.message }}</p>
+                        <small>{{ notification.created_at|date:"F j, Y, g:i a" }}</small>
+                    </div>
+                    <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                </li>
+            {% empty %}
+                <li class="notification-card">No notifications available.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        function toggleNotifications() {
+            const container = document.querySelector('.notifications-container');
+            const overlay = document.querySelector('.notifications-overlay');
+            container.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        // Close notifications when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.querySelector('.notifications-container');
+            const overlay = document.querySelector('.notifications-overlay');
+            const notificationsBtn = document.querySelector('.notifications-toggle');
+            
+            if (!container.contains(event.target) && 
+                !notificationsBtn.contains(event.target) && 
+                container.classList.contains('show')) {
+                container.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+        });
+
+        // Prevent event bubbling for notification cards
+        document.querySelectorAll('.notification-card').forEach(card => {
+            card.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+</body>
+</html>
