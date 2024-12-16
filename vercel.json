@@ -6,7 +6,7 @@
         "use": "@vercel/python",
         "config": {
           "maxLambdaSize": "15mb",
-          "runtime": "python3.3.12.2"
+          "runtime": "python3.9"
         }
       },
       {
@@ -24,7 +24,8 @@
       },
       {
         "src": "/(.*)",
-        "dest": "backend/wsgi.py"
+        "dest": "brands/wsgi.py"
       }
     ]
   }
+  
