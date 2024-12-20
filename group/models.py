@@ -39,6 +39,7 @@ class Post(models.Model):
         return f"{self.subject} - {self.status}"
 
 class Employee(models.Model):
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)
     employee_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)

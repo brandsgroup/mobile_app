@@ -1,6 +1,7 @@
 
 import os
 from pathlib import Path
+from pyexpat.errors import messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o=tn4-l)d$kcosc8dm7%d#lvl+!iop4y_**wl+(xnc+n-9)52-'
@@ -26,7 +27,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 ROOT_URLCONF = 'brands.urls'
 
 TEMPLATES = [
@@ -114,8 +117,8 @@ STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles_build', 'static')
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LOGIN_URL = '/admin-login/' 
-LOGIN_URL = '/employee-login/'  # Update to your login 
+ADMIN_LOGIN_URL = 'admin_login' 
+LOGIN_URL = 'employee_login'  # Update to your login 
 LOGIN_REDIRECT_URL = "/employee_dashboard/"  # Redirect here after successful login
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine
@@ -151,3 +154,11 @@ LOGGING = {
         },
     },
 }
+
+# MESSAGE_TAGS = {
+#     messages.DEBUG: 'alert-info',
+#     messages.INFO: 'alert-info',
+#     messages.SUCCESS: 'alert-success',
+#     messages.WARNING: 'alert-warning',
+#     messages.ERROR: 'alert-danger',
+# }

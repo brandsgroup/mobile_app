@@ -55,7 +55,12 @@ class NotificationForm(forms.ModelForm):
         }
 
 
+
 class DailyUpdateForm(forms.ModelForm):
     class Meta:
         model = DailyUpdate
-        fields = ['subject', 'description']  # Exclude 'date' and 'time'
+        fields = ['subject', 'description']
+        widgets = {
+            'subject': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+        }

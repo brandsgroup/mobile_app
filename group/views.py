@@ -1,6 +1,8 @@
 import json
 import logging
 from django.contrib.auth import logout
+from django.urls import reverse
+
 from .forms import *
 from .models import *
 from django.shortcuts import render, redirect, get_object_or_404
@@ -25,6 +27,7 @@ import functools
 from django.contrib.auth.models import User
 from django.utils import timezone
 from decimal import Decimal  # Add this import at the top
+from django.conf import settings
 
 # Hardcoded admin credentials
 ADMIN_CREDENTIALS = {
@@ -35,6 +38,15 @@ ADMIN_CREDENTIALS = {
 def home(request):
     return render(request, 'home.html')
 
+logger = logging.getLogger(__name__)
+
+# Decorator to enforce admin login
+def admin_login_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('admin_login')}?next={request.path}")
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 # admin login
 def admin_login_view(request):
@@ -109,24 +121,14 @@ def employee_login_view(request):
     return render(request, 'employee_login.html')
 # Modify the login_required decorator to work with your custom Employee model
 
+
 def employee_login_required(function):
-    @functools.wraps(function)
     def wrap(request, *args, **kwargs):
-        # Check if username exists in session
-        username = request.session.get('username')
-        if username:
-            try:
-                # Verify employee exists
-                employee = Employee.objects.get(username=username)
-                request.user = employee  # Attach employee to request
-                return function(request, *args, **kwargs)
-            except Employee.DoesNotExist:
-                messages.error(request, "Employee session invalid. Please login again.")
-        
-        # Store the requested URL in session for redirect after login
-        next_url = request.get_full_path()
-        request.session['next'] = next_url
-        return redirect('employee_login')
+        # Check both session and User authentication
+        if not request.session.get('employee_id'):
+            messages.error(request, "Please log in to continue.")
+            return redirect('employee_login')
+        return function(request, *args, **kwargs)
     return wrap
 
 
@@ -394,12 +396,11 @@ def handle_demand_employee(request):
 
 # Handle Demand Requests in Admin Dashboard
 
-@login_required
-
-@csrf_exempt  # Ensure CSRF protection is enabled in production
+# @login_required(login_url='/admin-login/')
+# @csrf_exempt  # Ensure CSRF protection is enabled in production
 def handle_demand_admin(request):
-    if not request.user.is_authenticated:
-        return redirect(f'/admin-login/?next={request.path}')
+    # if not request.user.is_authenticated:
+    #     return redirect(f'/admin-login/?next={request.path}')
     if request.method == 'POST':
         demand_id = request.POST.get('demand_id')
         action = request.POST.get('action')
@@ -532,101 +533,113 @@ def holiday_list(request):
     sl_count = 12
 
     return render(request, 'calendar.html', {'holidays': holidays, 'pl_count': pl_count, 'sl_count': sl_count})
-@login_required  # Change from @employee_login_required
+
+# Employee dashboard view
+@employee_login_required
 def daily_update(request, post_id=None):
     try:
-        # Get user directly from request instead of session
-        employee = request.user
+        # Get employee from session
+        employee_id = request.session.get('employee_id')
+        user_id = request.session.get('user_id')
         
-        # Initialize post
+        if not user_id:
+            messages.error(request, "User session expired. Please login again.")
+            return redirect('employee_login')
+
+        # Initialize post as None for new updates
         post = None
         if post_id:
-            post = DailyUpdate.objects.filter(id=post_id, employee=employee).first()
-            if not post:
-                messages.error(request, "Update not found or access denied.")
-                return redirect('daily_update')
+            # Fetch existing post for editing, ensuring it belongs to the current employee
+            post = get_object_or_404(DailyUpdate, id=post_id, employee_id=user_id)
 
         if request.method == 'POST':
             form = DailyUpdateForm(request.POST, instance=post)
             if form.is_valid():
-                updated_post = form.save(commit=False)
-                updated_post.employee = employee
-                updated_post.save()
-                messages.success(request, "Update saved successfully.")
+                update = form.save(commit=False)
+                update.employee_id = user_id
+                update.save()
+                
+                messages.success(request, 
+                    "Update modified successfully!" if post_id else "Daily update submitted successfully!")
                 return redirect('daily_update')
-            else:
-                messages.error(request, "Please correct the errors below.")
         else:
             form = DailyUpdateForm(instance=post)
 
-        # Fetch employee's posts
-        employee_posts = DailyUpdate.objects.filter(employee=employee)
-
-        return render(request, 'daily_update.html', {
-            'form': form,
-            'employee_posts': employee_posts,
-            'post': post,
-        })
+        # Get only the current employee's posts
+        employee_posts = DailyUpdate.objects.filter(
+            employee_id=user_id
+        ).order_by('-created_at')
         
+        context = {
+            'form': form,
+            'post': post,
+            'employee_posts': employee_posts,
+        }
+        return render(request, 'daily_update.html', context)
+
     except Exception as e:
-        messages.error(request, f"An error occurred: {str(e)}")
-        logger.error(f"Error in daily_update: {str(e)}")
+        logger.error(f"Error in daily_update view: {str(e)}")
+        messages.error(request, "An error occurred. Please try again.")
         return redirect('employee_dashboard')
-@login_required
+
+# @admin_required  # Make sure you have this decorator
 def admin_daily_update(request):
-    if request.user.is_staff:
-        # Admin: Show all posts
-        posts = DailyUpdate.objects.all()
-    else:
-        # Employee: Show their own posts
-        posts = DailyUpdate.objects.filter(employee=request.user)
+    try:
+        # Check if the user is an admin based on session variable
+        # if not request.session.get('is_admin'):
+        #     return redirect(reverse('admin_login'))
 
-    # Allow employees to create posts
-    if not request.user.is_staff and request.method == "POST":
-        form = DailyUpdateForm(request.POST)
-        if form.is_valid():
-            daily_update = form.save(commit=False)
-            daily_update.employee = request.user
-            daily_update.save()
-            return redirect('admin_daily_update')
-    else:
-        form = DailyUpdateForm() if not request.user.is_staff else None
+        # Fetch updates with related employee info
+        posts = DailyUpdate.objects.all().select_related('employee').order_by('-created_at')
+        
+        context = {
+            'posts': posts,  # Changed from 'updates' to 'posts' to match template
+        }
+        
+        # Let's add some logging to debug
+        print(f"Number of posts fetched: {posts.count()}")
+        for post in posts:
+            print(f"Post: {post.subject} by {post.employee}")
+            
+        return render(request, 'admin_daily_update.html', context)
 
-    return render(request, 'admin_daily_update.html', {'form': form, 'posts': posts})
-
-
-@login_required
+    except Exception as e:
+        # Log the error
+        logger.error(f"Error in admin_daily_update: {str(e)}")
+        messages.error(request, "An error occurred while loading updates.")
+        return redirect(reverse('admin_dashboard'))
+@admin_login_required
 def admin_edit_update(request, update_id):
-    post = get_object_or_404(DailyUpdate, id=update_id)
-
-    # Check if the logged-in user is the owner or admin
-    if not request.user.is_staff and post.employee != request.user:
+    try:
+        update = get_object_or_404(DailyUpdate, id=update_id)
+        if request.method == 'POST':
+            subject = request.POST.get('subject')
+            description = request.POST.get('description')
+            if subject and description:
+                update.subject = subject
+                update.description = description
+                update.save()
+                messages.success(request, "Update modified successfully!")
+                return redirect('admin_daily_update')
+            else:
+                messages.error(request, "Both subject and description are required.")
+        return render(request, 'admin_edit_update.html', {'update': update})
+    except Exception as e:
+        logger.error(f"Error in admin_edit_update: {str(e)}")
+        messages.error(request, "An error occurred. Please try again.")
         return redirect('admin_daily_update')
 
-    if request.method == "POST":
-        form = DailyUpdateForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect('admin_daily_update')
-    else:
-        form = DailyUpdateForm(instance=post)
-
-    return render(request, 'admin_daily_update.html', {'form': form, 'post': post})
-
-
-@login_required
+@admin_login_required
 def admin_delete_update(request, update_id):
-    post = get_object_or_404(DailyUpdate, id=update_id)
-
-    # Check if the logged-in user is an admin
-    if not request.user.is_staff:
+    try:
+        update = get_object_or_404(DailyUpdate, id=update_id)
+        update.delete()
+        messages.success(request, "Update deleted successfully.")
         return redirect('admin_daily_update')
-
-    if request.method == "POST":
-        post.delete()
+    except Exception as e:
+        logger.error(f"Error in admin_delete_update: {str(e)}")
+        messages.error(request, "An error occurred. Please try again.")
         return redirect('admin_daily_update')
-
-    return redirect('admin_daily_update')
 
 
 @employee_login_required

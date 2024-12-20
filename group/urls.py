@@ -7,7 +7,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     
     # Authentication Paths
-    path('admin-login/', views.admin_login_view, name='admin_login'),
+    path('admin_login/', views.admin_login_view, name='admin_login'),
     path('employee_login/', views.employee_login_view, name='employee_login'),
     
     # Admin Dashboard Paths
