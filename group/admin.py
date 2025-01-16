@@ -7,7 +7,8 @@ from .models import (
     Demand,
     MoneyTransferProof,
     BillUpload,
-    DailyUpdate
+    DailyUpdate,
+    LoginLogoutActivity
 )
 
 
@@ -72,3 +73,16 @@ class DailyUpdateAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'date', 'time')
 
 admin.site.register(DailyUpdate, DailyUpdateAdmin)
+
+
+@admin.register(LoginLogoutActivity)
+class LoginLogoutActivityAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'login_time', 'login_latitude', 'login_longitude')
+    # list_filter = ('login_time')
+    search_fields = ('employee__employee_id', 'employee__name')
+    # readonly_fields = ('login_time')
+    date_hierarchy = 'login_time'
+
+    def has_add_permission(self, request):
+        # Disabling add functionality since this model represents log data
+        return False

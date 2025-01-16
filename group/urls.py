@@ -61,7 +61,7 @@ urlpatterns = [
     
     path('debug-session/', views.debug_session_view, name='debug_session'),
 
-
+    path('attendance/', views.attendance_view, name='attendance'),
 
 ]+ static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
 

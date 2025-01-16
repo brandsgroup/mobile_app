@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.timezone import now
 from datetime import date, time
 from django.utils.timezone import make_aware
+from pytz import timezone as pytz_timezone
 # Create your models here.
 
 class EmployeeProfile(models.Model):
@@ -142,3 +143,29 @@ class DailyUpdate(models.Model):
 
     def __str__(self):
         return f"Update by {self.employee.username} on {self.date} at {self.time}"
+    
+
+class LoginLogoutActivity(models.Model):
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE)
+    login_time = models.DateTimeField(default=now)
+    # logout_time = models.DateTimeField(null=True, blank=True)
+    login_latitude = models.FloatField()
+    login_longitude = models.FloatField()
+    # logout_latitude = models.FloatField(null=True, blank=True)
+    # logout_longitude = models.FloatField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Convert login_time and logout_time to IST before saving
+        ist = pytz_timezone('Asia/Kolkata')
+        if not self.login_time:
+            self.login_time = now().astimezone(ist)
+        else:
+            self.login_time = self.login_time.astimezone(ist)
+
+        if self.logout_time:
+            self.logout_time = self.logout_time.astimezone(ist)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Activity for {self.employee.employee_id} on {self.login_time}"

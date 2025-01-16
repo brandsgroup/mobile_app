@@ -2,7 +2,7 @@ import json
 import logging
 from django.contrib.auth import logout
 from django.urls import reverse
-
+from geopy.geocoders import Nominatim
 from .forms import *
 from .models import *
 from django.shortcuts import render, redirect, get_object_or_404
@@ -136,65 +136,45 @@ def employee_login_required(function):
 def save_location(request):
     if request.method == 'POST':
         try:
-            # Get employee_id from session
             employee_id = request.session.get('employee_id')
             if not employee_id:
-                logger.error("Location save attempted without login")
-                return JsonResponse({
-                    "success": False, 
-                    "error": "Please login first",
-                    "redirect_url": '/employee_dashboard/'  # Add redirect URL
-                }, status=403)
+                logger.error("Employee ID is missing in session.")
+                return JsonResponse({"success": False, "error": "Please login first"}, status=403)
 
-            # Parse location data
             data = json.loads(request.body)
             latitude = data.get('latitude')
             longitude = data.get('longitude')
 
-            # Validate coordinates
             if not all([latitude, longitude]):
-                return JsonResponse({
-                    "success": False, 
-                    "error": "Invalid coordinates"
-                }, status=400)
+                logger.error("Invalid coordinates: latitude=%s, longitude=%s", latitude, longitude)
+                return JsonResponse({"success": False, "error": "Invalid coordinates"}, status=400)
 
-            # Save location
             employee = Employee.objects.get(employee_id=employee_id)
-            employee.latitude = latitude
-            employee.longitude = longitude
-            employee.save()
+            login_activity = LoginLogoutActivity(
+                employee=employee,
+                login_time=timezone.now(),
+                login_latitude=latitude,
+                login_longitude=longitude,
+            )
+            login_activity.save()
 
-            return JsonResponse({
-                "success": True,
-                "message": "Location saved successfully",
-                "redirect_url": '/employee_dashboard/'  # Add redirect URL
-            })
+            logger.info("Login activity recorded for employee_id=%s", employee_id)
+            return JsonResponse({"success": True, "message": "Login recorded successfully", "redirect_url": '/employee_dashboard/'})
 
         except Employee.DoesNotExist:
-            logger.error(f"Location save attempted with invalid employee_id: {employee_id}")
-            return JsonResponse({
-                "success": False, 
-                "error": "Invalid session",
-                "redirect_url": '/employee_login/'
-            }, status=403)
+            logger.error("Employee with ID %s does not exist.", employee_id)
+            return JsonResponse({"success": False, "error": "Invalid session", "redirect_url": '/employee_login/'}, status=403)
 
-        except json.JSONDecodeError:
-            return JsonResponse({
-                "success": False, 
-                "error": "Invalid JSON data"
-            }, status=400)
+        except json.JSONDecodeError as e:
+            logger.error("JSON decode error: %s", str(e))
+            return JsonResponse({"success": False, "error": "Invalid JSON data"}, status=400)
 
         except Exception as e:
-            logger.error(f"Error saving location: {str(e)}")
-            return JsonResponse({
-                "success": False, 
-                "error": "An error occurred"
-            }, status=500)
+            logger.exception("An unexpected error occurred: %s", str(e))
+            return JsonResponse({"success": False, "error": f"An error occurred: {str(e)}"}, status=500)
 
-    return JsonResponse({
-        "success": False, 
-        "error": "Invalid request method"
-    }, status=405)
+    logger.error("Invalid request method: %s", request.method)
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
 
 @employee_login_required
 def employee_dashboard(request):
@@ -215,6 +195,7 @@ def employee_dashboard(request):
         print(f"Dashboard error: {str(e)}")
         request.session.flush()
         return redirect('/employee_login/')
+    
 def logout_view(request):
     request.session.flush()
     return redirect('home')
@@ -222,18 +203,80 @@ def is_admin(user):
     return user.is_authenticated and user.is_staff
 
 # Employee logout function to save logout time
+
+@csrf_exempt
+@require_http_methods(["POST"])
+
 def employee_logout_view(request):
     try:
+        # Get employee_id from session
         employee_id = request.session.get('employee_id')
-        if employee_id:
+        logger.info(f"Employee ID from session: {employee_id}")
+        
+        if not employee_id:
+            logger.error("No employee_id found in session")
+            return JsonResponse({"success": False, "error": "Session not found"}, status=403)
+        
+        try:
+            # Parse request body
+            data = json.loads(request.body)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON data: {e}")
+            return JsonResponse({"success": False, "error": "Invalid JSON data"}, status=400)
+        
+        # Extract and validate coordinates
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        logger.info(f"Received coordinates: lat={latitude}, lon={longitude}")
+        
+        if not all([latitude, longitude]):
+            logger.error("Missing coordinates in request")
+            return JsonResponse({"success": False, "error": "Invalid coordinates"}, status=400)
+        
+        try:
+            # Get employee and their active session
             employee = Employee.objects.get(employee_id=employee_id)
-            employee.office_in_time = None  # Optionally reset login time
-            employee.save()
-        request.session.flush()  # Clear session
-    except Employee.DoesNotExist:
-        pass
-    return redirect('home')
-
+            
+            login_activity = LoginLogoutActivity.objects.select_for_update().filter(
+                employee=employee,
+                logout_time__isnull=True
+            ).first()
+            
+            if not login_activity:
+                logger.error(f"No active session found for employee {employee_id}")
+                return JsonResponse({"success": False, "error": "No active session found"}, status=404)
+            
+            # Update logout details
+            current_time = now()
+            login_activity.logout_time = current_time
+            login_activity.logout_latitude = float(latitude)
+            login_activity.logout_longitude = float(longitude)
+            
+            # Save changes
+            login_activity.save()
+            logger.info(f"Logout details saved successfully for employee {employee_id}")
+            
+            # Clear session at the end
+            request.session.flush()
+            logger.info(f"Session cleared for employee {employee_id}")
+            
+            return JsonResponse({
+                "success": True,
+                "message": "Logout successful",
+                "logout_time": current_time.isoformat()
+            })
+            
+        except Employee.DoesNotExist:
+            logger.error(f"Employee not found: {employee_id}")
+            return JsonResponse({"success": False, "error": "Invalid employee"}, status=404)
+        
+    except Exception as e:
+        logger.exception(f"Unexpected error during logout: {str(e)}")
+        return JsonResponse({
+            "success": False,
+            "error": "An unexpected error occurred during logout"
+        }, status=500)
 
 # View for displaying all employees
 def employee_view(request):
@@ -694,3 +737,24 @@ def debug_session_view(request):
         'is_authenticated': request.session.get('is_employee', False),
         'employee_id': request.session.get('employee_id'),
     })
+
+
+def attendance_view(request):
+    activities = LoginLogoutActivity.objects.all()
+    geolocator = Nominatim(user_agent="my_unique_user_agent")
+
+    # Add location names based on latitude and longitude
+    for activity in activities:
+        try:
+            if activity.login_latitude and activity.login_longitude:
+                activity.login_location = geolocator.reverse((activity.login_latitude, activity.login_longitude)).address
+            else:
+                activity.login_location = "Latitude or Longitude missing"
+        except GeocoderTimedOut:
+            activity.login_location = "Geocoding timed out"
+        except GeocoderQuotaExceeded:
+            activity.login_location = "Quota exceeded for geocoding API"
+        except Exception as e:
+            activity.login_location = f"Geocoding failed: {str(e)}"
+
+    return render(request, 'attendance.html', {'activities': activities})

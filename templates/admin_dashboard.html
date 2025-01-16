@@ -148,7 +148,15 @@
                 <div class="card-title">Calendar
                 </div>
             </a>
-
+            <a href="{% url 'attendance' %}" class="dashboard-card attendance-btn">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3 class="card-title">Attendance</h3>
+                </div>
+            </a>
+            
 
             <a href="{% url 'logout' %}" class="dashboard-card logout-btn">
                 <div class="card-icon"><i class="fas fa-sign-out-alt"></i></div>
