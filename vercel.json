@@ -5,8 +5,8 @@
       "src": "brands/wsgi.py",
       "use": "@vercel/python",
       "config": {
+        "runtime": "python3.12",
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
         "buildCommand": "bash build.sh"
       }
     }
