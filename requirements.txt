@@ -17,6 +17,7 @@ is-safe-url==1.0
 openpyxl==3.1.5
 packaging==24.2
 pillow==11.0.0
+pipdeptree==2.24.0
 psycopg2-binary==2.9.9
 python-dateutil==2.8.2
 pytz==2024.1
