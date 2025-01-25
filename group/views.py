@@ -740,7 +740,8 @@ def debug_session_view(request):
 
 
 def attendance_view(request):
-    activities = LoginLogoutActivity.objects.all()
+    activities = LoginLogoutActivity.objects.all()[:20]  # Fetch the first 50 entries
+
     geolocator = Nominatim(user_agent="my_unique_user_agent")
 
     # Add location names based on latitude and longitude
