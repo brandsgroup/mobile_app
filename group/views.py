@@ -740,22 +740,23 @@ def debug_session_view(request):
 
 
 def attendance_view(request):
-    activities = LoginLogoutActivity.objects.all()[:20]  # Fetch the first 50 entries
-
-    geolocator = Nominatim(user_agent="my_unique_user_agent")
-
-    # Add location names based on latitude and longitude
-    for activity in activities:
-        try:
+    activities = LoginLogoutActivity.objects.all()
+    
+    try:
+        geolocator = Nominatim(user_agent="my_unique_user_agent")
+        
+        for activity in activities:
             if activity.login_latitude and activity.login_longitude:
-                activity.login_location = geolocator.reverse((activity.login_latitude, activity.login_longitude)).address
+                try:
+                    location = geolocator.reverse((activity.login_latitude, activity.login_longitude), timeout=10)
+                    activity.login_location = location.address if location else "Location not found"
+                except Exception as geo_error:
+                    activity.login_location = f"Geocoding error: {str(geo_error)}"
             else:
-                activity.login_location = "Latitude or Longitude missing"
-        except GeocoderTimedOut:
-            activity.login_location = "Geocoding timed out"
-        except GeocoderQuotaExceeded:
-            activity.login_location = "Quota exceeded for geocoding API"
-        except Exception as e:
-            activity.login_location = f"Geocoding failed: {str(e)}"
-
+                activity.login_location = "Coordinates missing"
+    
+    except Exception as init_error:
+        print(f"Geocoder initialization error: {str(init_error)}")
+        activities = activities.annotate(login_location=Value("Geocoding unavailable"))
+    
     return render(request, 'attendance.html', {'activities': activities})
