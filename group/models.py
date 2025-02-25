@@ -145,6 +145,7 @@ class DailyUpdate(models.Model):
         return f"Update by {self.employee.username} on {self.date} at {self.time}"
     
 
+
 class LoginLogoutActivity(models.Model):
     employee = models.ForeignKey('Employee', on_delete=models.CASCADE)
     login_time = models.DateTimeField(default=now)

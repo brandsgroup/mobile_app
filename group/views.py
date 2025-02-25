@@ -625,21 +625,17 @@ def daily_update(request, post_id=None):
         messages.error(request, "An error occurred. Please try again.")
         return redirect('employee_dashboard')
 
-# @admin_required  # Make sure you have this decorator
+# @admin_required
 def admin_daily_update(request):
     try:
-        # Check if the user is an admin based on session variable
-        # if not request.session.get('is_admin'):
-        #     return redirect(reverse('admin_login'))
-
-        # Fetch updates with related employee info
+      
         posts = DailyUpdate.objects.all().select_related('employee').order_by('-created_at')
         
         context = {
-            'posts': posts,  # Changed from 'updates' to 'posts' to match template
+            'posts': posts, 
         }
         
-        # Let's add some logging to debug
+     
         print(f"Number of posts fetched: {posts.count()}")
         for post in posts:
             print(f"Post: {post.subject} by {post.employee}")
@@ -730,7 +726,7 @@ def employee_profile_view(request):
         messages.error(request, "An error occurred while loading your profile")
         return redirect('employee_dashboard')
 
-    
+     
 def debug_session_view(request):
     return JsonResponse({
         'session_data': dict(request.session),
@@ -741,22 +737,20 @@ def debug_session_view(request):
 
 def attendance_view(request):
     activities = LoginLogoutActivity.objects.all()
-    
-    try:
-        geolocator = Nominatim(user_agent="my_unique_user_agent")
-        
-        for activity in activities:
+    geolocator = Nominatim(user_agent="my_unique_user_agent")
+
+    # Add location names based on latitude and longitude
+    for activity in activities:
+        try:
             if activity.login_latitude and activity.login_longitude:
-                try:
-                    location = geolocator.reverse((activity.login_latitude, activity.login_longitude), timeout=10)
-                    activity.login_location = location.address if location else "Location not found"
-                except Exception as geo_error:
-                    activity.login_location = f"Geocoding error: {str(geo_error)}"
+                activity.login_location = geolocator.reverse((activity.login_latitude, activity.login_longitude)).address
             else:
-                activity.login_location = "Coordinates missing"
-    
-    except Exception as init_error:
-        print(f"Geocoder initialization error: {str(init_error)}")
-        activities = activities.annotate(login_location=Value("Geocoding unavailable"))
-    
+                activity.login_location = "Latitude or Longitude missing"
+        except GeocoderTimedOut:
+            activity.login_location = "Geocoding timed out"
+        except GeocoderQuotaExceeded:
+            activity.login_location = "Quota exceeded for geocoding API"
+        except Exception as e:
+            activity.login_location = f"Geocoding failed: {str(e)}"
+
     return render(request, 'attendance.html', {'activities': activities})

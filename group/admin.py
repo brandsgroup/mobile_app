@@ -78,11 +78,17 @@ admin.site.register(DailyUpdate, DailyUpdateAdmin)
 @admin.register(LoginLogoutActivity)
 class LoginLogoutActivityAdmin(admin.ModelAdmin):
     list_display = ('employee', 'login_time', 'login_latitude', 'login_longitude')
-    # list_filter = ('login_time')
     search_fields = ('employee__employee_id', 'employee__name')
-    # readonly_fields = ('login_time')
     date_hierarchy = 'login_time'
 
     def has_add_permission(self, request):
-        # Disabling add functionality since this model represents log data
+        # Allow superusers to add records manually
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        # Allow superusers to update records
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deletion by anyone, including superusers
         return False
